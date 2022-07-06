@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package tinkoff.public.invest.api.contract.v1;
+
+import "google/protobuf/timestamp.proto";
+
+service MarketDataService { //Сервис получения биржевой информации:</br> **1**. свечи;</br> **2**. стаканы;</br> **3**. торговые статусы;</br> **4**. лента сделок.
+
+  //Метод запроса последних цен по инструментам.
+  rpc GetLastPrices(GetLastPricesRequest) returns (GetLastPricesResponse);
+
+}
+
+//Запрос получения последних цен.
+message GetLastPricesRequest {
+  repeated string figi = 1; //Массив figi-идентификаторов инструментов.
+}
+
+//Список последних цен.
+message GetLastPricesResponse {
+  repeated LastPrice last_prices = 1; //Массив последних цен.
+}
+
+//Информация о цене.
+message LastPrice {
+  string figi = 1; //Идентификатор инструмента.
+  Quotation price = 2; //Последняя цена за 1 инструмент. Для получения стоимости лота требуется умножить на лотность инструмента.
+  google.protobuf.Timestamp time = 3; //Время получения последней цены в часовом поясе UTC по времени биржи. // uncomment line
+}
+
+//Котировка - денежная сумма без указания валюты
+message Quotation {
+
+  // целая часть суммы, может быть отрицательным числом
+  int64 units = 1;
+
+  // дробная часть суммы, может быть отрицательным числом
+  int32 nano = 2;
+}
