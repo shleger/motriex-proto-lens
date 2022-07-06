@@ -1,17 +1,19 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE OverloadedLabels #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeApplications #-}
 
 {- maybe needed
 
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings          #-}
-{-# LANGUAGE TypeApplications           #-}
 
 -}
 
 module Main where
 
 import Data.ProtoLens (defMessage)
+import Data.ProtoLens.Field (field)
 import Data.ProtoLens.Labels ()
 import Lens.Micro
 import Lens.Micro.Extras (view)
@@ -24,6 +26,7 @@ main = do
   putStrLn $ "::" <> show quot22
   print fooVal
   print quot22
+  print $ quot22 ^. field @"units" -- with TypeApplications, DataKinds ext
 
 fooVal :: P.Quotation
 fooVal = defMessage & #units .~ 42
