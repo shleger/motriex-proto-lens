@@ -29,18 +29,21 @@ executable motriex-proto-lens
   hs-source-dirs:   src
   other-modules:
       Paths_motriex_proto_lens
-      Proto.Marketdata
+      Proto.MarketData
+      Proto.MarketData_Fields
   build-tool-depends:
       proto-lens-protoc:proto-lens-protoc
   autogen-modules:
-       Proto.Marketdata
+       Proto.MarketData
+       Proto.MarketData_Fields
   build-depends:
-      base                      ^>=4.14.3.0
-    , proto-lens
-    , bytestring
-    , lens-family
-    , pretty
-    , proto-lens
-    , proto-lens-arbitrary
-    , proto-lens-runtime
-    , proto-lens-protobuf-types
+                base                      ^>=4.14.3.0
+                , bytestring
+                , lens-family
+                , microlens
+                , pretty
+                , proto-lens
+                , proto-lens
+                , proto-lens-arbitrary
+                , proto-lens-protobuf-types
+                , proto-lens-runtime
