@@ -1,3 +1,14 @@
+{-# LANGUAGE OverloadedLabels #-}
+{-# LANGUAGE OverloadedStrings #-}
+
+{- maybe needed
+
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE OverloadedStrings          #-}
+{-# LANGUAGE TypeApplications           #-}
+
+-}
+
 module Main where
 
 import Data.ProtoLens (defMessage)
@@ -8,12 +19,17 @@ import qualified Proto.Marketdata as P
 
 main :: IO ()
 main = do
-  putStrLn "Hello, Haskell!"
+  putStrLn $ "Hello, Haskell!" <> "OverloadedStrings"
+  putStrLn $ "Hello, Haskell!" ++ "OverloadedStrings"
+  putStrLn $ "::" <> show quot22
+  print fooVal
+  print quot22
 
---   putStrLn quot
+fooVal :: P.Quotation
+fooVal = defMessage & #units .~ 42
 
--- quot :: P.Quotation
--- quot =
---   defMessage
---     & #units .~ 123
---     & #nano .~ 567
+quot22 :: P.Quotation
+quot22 =
+  defMessage
+    & #units .~ 123
+    & #nano .~ 567
