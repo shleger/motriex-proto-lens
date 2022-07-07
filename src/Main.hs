@@ -6,7 +6,6 @@
 {- maybe needed
 
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE OverloadedStrings          #-}
 
 -}
 
