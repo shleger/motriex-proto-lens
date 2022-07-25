@@ -1,10 +1,13 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedLabels #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# HLINT ignore "Redundant bracket" #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 
 {- maybe needed
@@ -29,6 +32,9 @@ import Control.Concurrent.Async.Lifted (replicateConcurrently)
 import Control.Exception (Exception, throwIO)
 import Control.Monad (replicateM, void)
 import Control.Monad.IO.Class (liftIO)
+import Data.Aeson (encode)
+import Data.Aeson.TH (defaultOptions)
+import Data.Aeson.Types (ToJSON (..), genericToEncoding)
 import Data.ByteString (ByteString)
 import qualified Data.ByteString.Char8 as BC (pack)
 import qualified Data.ByteString.Char8 as ByteString
@@ -39,6 +45,7 @@ import Data.ProtoLens.Labels ()
 import Data.String (fromString)
 import Data.Text as T (pack)
 import qualified Data.Text as Text
+import GHC.Generics (Generic)
 import GHC.Int (Int8)
 import GHC.TypeLits (Symbol, symbolVal)
 import Lens.Micro
@@ -53,6 +60,8 @@ import qualified Network.HTTP2.Client as Client
 import Options.Generic
 import qualified Proto.Marketdata as P
 import qualified Proto.Marketdata_Fields as PF
+import Text.Printf (printf)
+import Text.Read
 
 fooVal :: P.Quotation
 fooVal = defMessage & #units .~ 42
@@ -66,38 +75,61 @@ quot22 =
 reqLastPrices2 :: P.GetLastPricesRequest
 reqLastPrices2 =
   defMessage
-    & #figi .~ ["BBG0013HJJ31", "BBG0013HGFT4"]
+    & #figi .~ ["BBG0013HJJ31", "BBG0013HGFT4"] --EUR,USD
+
+data CurrencyLastPrice = CurrencyLastPrice
+  { code :: String,
+    value :: Float
+  }
+  deriving (Generic, Show)
+
+instance ToJSON CurrencyLastPrice
+
+curEUR = CurrencyLastPrice "ASD" 123
 
 main :: IO ()
-main = do
-  putStrLn $ "Hello, Haskell!" <> "OverloadedStrings"
-  putStrLn $ "Hello, Haskell!" ++ "OverloadedStrings"
-  putStrLn $ "::" <> show quot22
-  print fooVal
-  print quot22
-  print reqLastPrices2
-  print $ quot22 ^. field @"units" -- with TypeApplications, DataKinds ext
-  -- read token from local storage
-  tintoken <- readToken
+main =
+  do
+    -- print (encode curEUR)
 
-  let connConfig =
-        ConnConfig
-          { host = "invest-public-api.tinkoff.ru",
-            port = 443,
-            tls = True,
-            tintoken = tintoken
-          }
+    {-
+    putStrLn $ "Hello, Haskell!" <> "OverloadedStrings"
+    putStrLn $ "Hello, Haskell!" ++ "OverloadedStrings"
+    putStrLn $ "::" <> show quot22
+    print fooVal
+    print quot22
+    print reqLastPrices2
+    print $ quot22 ^. field @"units" -- with TypeApplications, DataKinds ext
+    -- read token from local storage
+    -}
+    tintoken <- readToken
 
-  tinClient <- initGrpcConn connConfig
+    let connConfig =
+          ConnConfig
+            { host = "invest-public-api.tinkoff.ru",
+              port = 443,
+              tls = True,
+              tintoken = tintoken
+            }
 
-  resp <- runGrpc (prices tinClient reqLastPrices2)
-  print resp
+    tinClient <- initGrpcConn connConfig
 
-  putStrLn "Fin execution"
+    resp <- (^. PF.lastPrices) <$> runGrpc (prices tinClient reqLastPrices2)
+
+    let f = head resp
+    let p1 = f ^. PF.price . PF.units
+    let p2 = fromIntegral $ f ^. PF.price . PF.nano
+    let p1p2 = show p1 ++ "." ++ show p2
+
+    printf "%.2g" $ output $ readMaybe p1p2
 
 -- TODO add Exception case
 readToken :: IO String
 readToken = readFile ".tintoken"
+
+output :: Maybe Float -> Float
+output (Just x) = x
+output Nothing = 0.0
 
 prices :: Helper.GrpcClient -> P.GetLastPricesRequest -> Client.ClientIO (Either Client.TooMuchConcurrency (RawReply P.GetLastPricesResponse))
 prices = rawUnary (PL.RPC :: PL.RPC P.MarketDataService "getLastPrices")

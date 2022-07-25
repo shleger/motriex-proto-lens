@@ -39,6 +39,7 @@ executable motriex-proto-lens
       Proto.Marketdata_Fields
   build-depends:
                   base                      ^>=4.14.3.0
+                , aeson  
                 , binary >= 0.8.8.0
                 , bytestring
                 , http2-client >= 0.9.0.0
