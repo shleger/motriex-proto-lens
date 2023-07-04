@@ -9,6 +9,8 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# LANGUAGE PackageImports               #-}
+
 
 {- maybe needed
 
@@ -33,6 +35,7 @@ import Control.Exception (Exception, throwIO)
 import Control.Monad (replicateM, void)
 import Control.Monad.IO.Class (liftIO)
 import Data.Aeson (encode)
+import Data.Aeson.Encode.Pretty ( encodePretty )
 import Data.Aeson.TH (defaultOptions)
 import Data.Aeson.Types (ToJSON (..), genericToEncoding)
 import Data.ByteString (ByteString)
@@ -48,20 +51,24 @@ import qualified Data.Text as Text
 import GHC.Generics (Generic)
 import GHC.Int (Int8)
 import GHC.TypeLits (Symbol, symbolVal)
-import Lens.Micro
+import Lens.Micro ( (&), (.~), (^.) )
 import Lens.Micro.Extras (view)
-import Network.GRPC.Client (CompressMode (..), RawReply, StreamDone (..), Timeout (..), open, singleRequest, streamReply, streamRequest)
+import Network.GRPC.ClientMy (CompressMode (..), RawReply, StreamDone (..), Timeout (..), open, singleRequest, streamReply, streamRequest)
 import Network.GRPC.Client.Helpers (GrpcClientConfig (_grpcClientConfigCompression), grpcClientConfigSimple, rawUnary, setupGrpcClient, _grpcClientConfigHeaders)
 import qualified Network.GRPC.Client.Helpers as Helper
-import Network.GRPC.HTTP2.Encoding as Encoding
-import Network.GRPC.HTTP2.ProtoLens as PL
-import Network.HTTP2.Client (PortNumber)
-import qualified Network.HTTP2.Client as Client
-import Options.Generic
+import Network.GRPC.HTTP2.Encoding as Encoding ()
+import Network.GRPC.HTTP2.ProtoLens as PL ( RPC(..) )
+import "http2-client" Network.HTTP2.Client (PortNumber)
+import qualified "http2-client" Network.HTTP2.Client as Client
+import Options.Generic ( Generic, Text )
 import qualified Proto.Marketdata as P
 import qualified Proto.Marketdata_Fields as PF
 import Text.Printf (printf)
-import Text.Read
+import Text.Read ( readMaybe )
+import qualified Proto.Marketdata as PF
+-- import Piesync.Data.ProtoLen
+
+
 
 fooVal :: P.Quotation
 fooVal = defMessage & #units .~ 42
@@ -116,12 +123,24 @@ main =
 
     resp <- (^. PF.lastPrices) <$> runGrpc (prices tinClient reqLastPrices2)
 
-    let f = head resp
+    let f =  resp !! 1
     let p1 = f ^. PF.price . PF.units
     let p2 = fromIntegral $ f ^. PF.price . PF.nano
     let p1p2 = show p1 ++ "." ++ show p2
+    -- let json = encodeMessageJSON f
+    let pp = Person{name="dd", age=123}
+    let ppJson = encodePretty pp
 
-    printf "%.2g" $ output $ readMaybe p1p2
+    print  (show p1p2)
+
+data Person = Person {
+      name :: Text
+    , age  :: Int
+    } deriving (Generic, Show) 
+
+instance ToJSON Person where
+    toEncoding = genericToEncoding defaultOptions 
+
 
 -- TODO add Exception case
 readToken :: IO String

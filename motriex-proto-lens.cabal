@@ -31,22 +31,28 @@ executable motriex-proto-lens
       Paths_motriex_proto_lens
       Proto.Marketdata
       Proto.Marketdata_Fields
-      Network.GRPC.HTTP2.ProtoLens
+      Network.GRPC.HTTP2.ProtoLens   
+      
+      Network.GRPC.Client.Helpers
+      Network.GRPC.ClientMy
+      Network.GRPC.HTTP2.Encoding
+      Network.GRPC.HTTP2.Types
+
+
+      
   build-tool-depends:
       proto-lens-protoc:proto-lens-protoc
   autogen-modules:
       Proto.Marketdata
       Proto.Marketdata_Fields
   build-depends:
-                  base                      ^>=4.14.3.0
+                  base >= 4                    
                 , aeson  
-                , binary >= 0.8.8.0
+                , aeson-pretty 
+                , binary 
                 , bytestring
-                , http2-client >= 0.9.0.0
-                , http2-client-grpc >= 0.8.0.0
-                , http2-grpc-types >= 0.5.0.0
                 , lens-family
-                , lifted-async >= 0.10.2.2
+                , lifted-async 
                 , microlens
                 , optparse-generic
                 , pretty
@@ -54,4 +60,14 @@ executable motriex-proto-lens
                 , proto-lens-arbitrary
                 , proto-lens-protobuf-types
                 , proto-lens-runtime
-                , text >= 1.2.4.1
+                , containers 
+                , base64-bytestring 
+                , text 
+                , case-insensitive
+                , zlib
+                , http2
+                , http2-client 
+                , network
+                , lifted-base
+                , tls
+                , data-default-class
