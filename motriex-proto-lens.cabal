@@ -34,7 +34,7 @@ executable motriex-proto-lens
       Network.GRPC.HTTP2.ProtoLens   
       
       Network.GRPC.Client.Helpers
-      Network.GRPC.ClientMy
+      Network.GRPC.ClientProto
       Network.GRPC.HTTP2.Encoding
       Network.GRPC.HTTP2.Types
 

@@ -47,7 +47,7 @@
 -- some overhead (much like the three above streaming helpers assume a simple
 -- behavior from the server). Hence, it is generally a good idea to take
 -- inspiration from the existing RPC functions and learn how to write one.
-module Network.GRPC.ClientMy (
+module Network.GRPC.ClientProto (
   -- * Building blocks.
     RPCCall(..)
   , CIHeaderList
@@ -96,7 +96,7 @@ import Data.Monoid ((<>))
 
 import Network.GRPC.HTTP2.Types
 import Network.GRPC.HTTP2.Encoding
-import Network.HTTP2
+import Network.HTTP2.Frame
 import Network.HPACK
 import "http2-client" Network.HTTP2.Client hiding (next)
 import Network.HTTP2.Client.Helpers
