@@ -74,3 +74,4 @@ executable motriex-proto-lens
                 , lifted-base
                 , tls
                 , data-default-class
+                , time
